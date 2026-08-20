@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "metrics": {
+    "production_loc": 2379,
+    "production_files": 32,
+    "production_packages": 9,
+    "test_files": 9,
+    "production_functions": 206,
+    "decision_points": 347
+  },
+  "persistence": {
+    "module": "go.etcd.io/bbolt",
+    "entities": ["Record", "AuditEvent", "Workflow", "Attachment"],
+    "reopen_test": "TestPersistenceSurvivesReopen"
+  },
+  "workflows": [
+    {
+      "steps": ["register record", "submit for review", "approve evidence", "issue claim code and archive"],
+      "test": "TestWorkflowCreateReviewArchive"
+    },
+    {
+      "steps": ["search by batch or applicant", "select record", "update note and status", "publish claim code"],
+      "test": "TestWorkflowSearchUpdatePublish"
+    },
+    {
+      "steps": ["import CSV rows", "validate batch", "persist accepted records", "report status counts"],
+      "test": "TestWorkflowImportReport"
+    },
+    {
+      "steps": ["recall approved batch", "invalidate cached decision", "retry submission independently", "verify persisted status"],
+      "test": "TestBusiness01Regression"
+    }
+  ]
+}
