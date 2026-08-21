@@ -30,12 +30,13 @@ func TestBusiness01Regression(t *testing.T) {
 	if _, err = svc.Approve(item.ID, "checker", "t3"); err != nil {
 		t.Fatal(err)
 	}
-	got, err := svc.RecallAndRetry(item.ID, "checker", "t4")
-	if err != nil {
-		t.Fatal(err)
+	first, firstErr := svc.RecallAndRetry(item.ID, "checker", "t4")
+	second, secondErr := svc.RecallAndRetry(item.ID, "checker", "t5")
+	if firstErr != nil || secondErr != nil {
+		t.Fatalf("recall and retry failed: first=%v second=%v", firstErr, secondErr)
 	}
-	if got.Status != "submitted" {
-		t.Fatalf("want submitted, got %s", got.Status)
+	if first.Status != "submitted" || second.Status != "submitted" {
+		t.Fatalf("want independent submitted states, got %s and %s", first.Status, second.Status)
 	}
 }
 
