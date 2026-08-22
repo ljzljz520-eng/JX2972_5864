@@ -101,10 +101,13 @@ func (s *Service) ChangeStatus(id, target, actor, at string) (model.Record, erro
 	if err := s.repo.SaveRecord(item); err != nil {
 		return model.Record{}, err
 	}
-	if target != "recalled" {
-		s.invalidate(id)
-		s.putCache(item)
-	}
+	// Always invalidate the stale cached decision and repopulate from the
+	// freshly persisted record. Recalling a batch must not leave the prior
+	// approved decision live in the cache: a subsequent retry reads the
+	// confirmed, independently persisted status rather than a stale copy,
+	// so repeated recall-and-retry actions stay mutually independent.
+	s.invalidate(id)
+	s.putCache(item)
 	if err := s.audit(item, "status", actor, target, at); err != nil {
 		return model.Record{}, err
 	}
